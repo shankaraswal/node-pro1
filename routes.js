@@ -1,13 +1,20 @@
 const express = require('express');
 const app = express();
+const mongoose = require('mongoose');
+mongoose.set('useFindAndModify', false);
+const {mongourl} =require('./config/keys')
+const Wish = require('./models/wish');
 
-let data =['code', 'sleep', 'eat'];
+
+mongoose.connect(mongourl, {useNewUrlParser:true});
 
 module.exports = (app) => {
-    app.get('/home', (req, res) => {
-        res.render('home', {
-            mylist: data
-        })
+    app.get('/', (req, res) => {
+        Wish.find({}).then(data =>{
+            res.render('home', {
+                mylist: data
+            })
+        });
     })
 
     app.get('/about', (req, res) => {
@@ -16,28 +23,29 @@ module.exports = (app) => {
 
     
     app.post('/sent', (req, res) => {
-       data.push(req.body.item);
-       res.sent(data)
+        //    data.push(req.body.item);
+        //    res.sent(data)
+
+        const Item = new Wish({
+            wish: req.body.item
+        })
+        Item.save().then(data =>{
+            console.log('item saved')
+            res.send('post');
+        }).catch(err =>{
+            throw err;
+        })
     })
 
 
     app.delete('/remove/:id', (req, res)=>{
-       
-        data = data.map(item=>{
-            if(item!==req.params.id){
-                return item;
-            }
-
+        Wish.findOneAndRemove({wish:req.params.id}).then(data =>{
+            console.log('record deleted');
+            res.send(data);
         })
-        console.log(data);
-        res.send(data);
+       
+       
+        
 
     })
-
-    // app.get('/profile/:id', (req, res) => {
-       
-    //     res.render('home', {
-    //         data: data
-    //     })
-    // });
 }
