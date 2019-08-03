@@ -16,15 +16,21 @@ module.exports = (app) => {
 
     
     app.post('/sent', (req, res) => {
-       console.log(req.body.item);
        data.push(req.body.item);
        res.sent(data)
     })
 
 
     app.delete('/remove/:id', (req, res)=>{
+       
+        data = data.map(item=>{
+            if(item!==req.params.id){
+                return item;
+            }
 
-        console.log(req.params.id)
+        })
+        console.log(data);
+        res.send(data);
 
     })
 
